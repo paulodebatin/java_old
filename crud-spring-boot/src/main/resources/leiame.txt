@@ -1,0 +1,10 @@
+1) Variáveis de ambiente
+
+a) Deixando o application.properties na mesma pasta do jar ou; Em uma pasta config dentro da pasta onde está o jar
+
+a) Lendo um arquivo application.properties externo ao JAR passando o arquivo
+java -jar /home/paulo/projetos/crud/backend-java-spring-boot/target/crud-spring-boot-0.0.1-SNAPSHOT.jar  --spring.config.location=file:application-prod.properties
+
+b) Passando o parâmetro por linha de comando
+java -jar /home/paulo/projetos/crud/backend-java-spring-boot/target/crud-spring-boot-0.0.1-SNAPSHOT.jar --application-description=testexpto
+
