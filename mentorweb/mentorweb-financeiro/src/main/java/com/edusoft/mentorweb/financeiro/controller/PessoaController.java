@@ -1,10 +1,12 @@
 package com.edusoft.mentorweb.financeiro.controller;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
+import org.modelmapper.Conditions;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +41,22 @@ public class PessoaController implements PessoaControllerOpenApi{
 	@GetMapping
 	@Override
 	public List<PessoaDTO> listar() {
-		return pessoaService.findAll().stream().map(this::converteToDTO).collect(Collectors.toList());
+		
+		// Exemplo para demonstrar: server.compression.enabled=true
+		List<PessoaDTO> pessoas = new ArrayList<PessoaDTO>();
+ 		for (int i = 0; i < 12000; i++) {
+			PessoaDTO pessoa = new PessoaDTO();
+			pessoa.setNome("Nome " + i);
+			pessoa.setEndereco("Endereco " + i);
+			pessoa.setBairro("Bairro " + i);
+			pessoa.setCidade("Cidade " + i);
+			pessoa.setUf("stado " + i);
+			pessoa.setCep("cep" + i);
+			pessoas.add(pessoa);
+		}
+		
+ 		return pessoas;
+		//return pessoaService.findAll().stream().map(this::converteToDTO).collect(Collectors.toList());
 	}
 	
 
@@ -48,26 +65,28 @@ public class PessoaController implements PessoaControllerOpenApi{
 	public ResponseEntity<PessoaDTO> atualizar(@Valid @Parameter(description = "id da pessoa a ser atualizada")  @PathVariable Long pessoaId,
 			@RequestBody PessoaDTO pessoaDTO) {
 		
-		if (!pessoaService.existsById(pessoaId)) {
+		Optional<Pessoa> pessoaOptional = pessoaService.findById(pessoaId);
+		if  (!pessoaOptional.isPresent()) {
 			return ResponseEntity.notFound().build();
 		}
 		
-		Pessoa pessoa = converteToEntity(pessoaDTO);
-		pessoa.setId(pessoaId);
+		modelMapper.getConfiguration().setPropertyCondition(Conditions.isNotNull());
+		
+		Pessoa pessoa = pessoaOptional.get();
+		modelMapper.map(pessoaDTO, pessoa);
+		
 		pessoa = pessoaService.save(pessoa);
 		
-		return ResponseEntity.ok(converteToDTO(pessoa));
+		modelMapper.map(pessoa,pessoaDTO);
+		
+		return ResponseEntity.ok(pessoaDTO);
 	}
 
-
-	private PessoaDTO converteToDTO(Pessoa pessoa) {
-		// Exemplo de conversoes: https://www.youtube.com/watch?v=HU7bfKG8nV4
-		return modelMapper.map(pessoa, PessoaDTO.class);
-	}
-	
-	private Pessoa converteToEntity(PessoaDTO pessoa) {
-		return modelMapper.map(pessoa, Pessoa.class);
-	}
+//
+//	private PessoaDTO converteToDTO(Pessoa pessoa) {
+//		// Exemplo de conversoes: https://www.youtube.com/watch?v=HU7bfKG8nV4
+//		return modelMapper.map(pessoa, PessoaDTO.class);
+//	}
 	
 	
 		
