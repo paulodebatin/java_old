@@ -16,7 +16,7 @@
 	<description>Exemplo CRUD</description>
 
 	<properties>
-		<java.version>11</java.version>
+		<java.version>14</java.version>
 		<mockito.version>2.24.0</mockito.version>
 	</properties>
 
@@ -108,10 +108,9 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.8.0</version>
 				<configuration>
-					<source>11</source>
-					<target>11</target>
+					<source>14</source>
+					<target>14</target>
 				</configuration>
 			</plugin>
 		</plugins>
