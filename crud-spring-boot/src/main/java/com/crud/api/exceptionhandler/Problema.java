@@ -1,6 +1,6 @@
 package com.crud.api.exceptionhandler;
 
-import java.time.OffsetDateTime;
+import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 public class Problema {
 
 	private Integer status;
-	private OffsetDateTime dataHora;
+	private Date dataHora;
 	private String titulo;
 	private List<Campo> campos;
 
@@ -51,11 +51,11 @@ public class Problema {
 		this.status = status;
 	}
 
-	public OffsetDateTime getDataHora() {
+	public Date getDataHora() {
 		return dataHora;
 	}
 
-	public void setDataHora(OffsetDateTime dataHora) {
+	public void setDataHora(Date dataHora) {
 		this.dataHora = dataHora;
 	}
 

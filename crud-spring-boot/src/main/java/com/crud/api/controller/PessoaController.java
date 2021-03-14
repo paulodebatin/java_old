@@ -2,13 +2,15 @@ package com.crud.api.controller;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.crud.exception.EntidadeNaoEncontradaException;
 import com.crud.service.CadastroPessoaService;
 import com.crud.vendas.domain.model.Pessoa;
 import com.crud.vendas.domain.repository.PessoaRepository;
@@ -68,11 +71,10 @@ public class PessoaController {
 	
 	
 	private String getJWTToken(String username) {
-		String secretKey = "mySecretKey";
-		List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-				.commaSeparatedStringToAuthorityList("ROLE_USER");
+		var secretKey = "mySecretKey";
+		var grantedAuthorities = AuthorityUtils.commaSeparatedStringToAuthorityList("ROLE_USER");
 		
-		String token = Jwts
+		var token = Jwts
 				.builder()
 				.setId("softtekJWT")
 				.setSubject(username)
@@ -92,6 +94,7 @@ public class PessoaController {
 	@Operation(summary = "Retornar todas as pessoas")
 	@ApiResponse(responseCode = "200", description = "Operação realizada com sucesso")
 	@GetMapping
+	@Cacheable(key = "listaPessoa")
 	public List<Pessoa> listar() {
 		return pessoaRepository.findAll();
 	}
@@ -100,17 +103,21 @@ public class PessoaController {
 	@ApiResponse(responseCode = "200", description = "Operação realizada com sucesso")
 	@ApiResponse(responseCode = "404", description = "Pessoa não encontrada")
 	@GetMapping("/{pessoaId}")
-	public ResponseEntity<Pessoa> buscar(@Parameter(description = "id da pessoa a ser consultada") @PathVariable Long pessoaId) {
+	public ResponseEntity<?> buscar(@Parameter(description = "id da pessoa a ser consultada") @PathVariable Long pessoaId) {
 		
 		pessoaRepository.fazOutraCoisa();
 		
-		Optional<Pessoa> pessoa = pessoaRepository.findById(pessoaId);
+		var pessoa = pessoaRepository.findById(pessoaId);
 		
-		if (pessoa.isPresent()) {
-			return ResponseEntity.ok(pessoa.get());
+		CacheControl cache = CacheControl.maxAge(60, TimeUnit.SECONDS); // Não funcionando
+		
+		if (!pessoa.isPresent()) {
+			throw new EntidadeNaoEncontradaException("Pessoa não encontrada");
 		}
 		
-		return ResponseEntity.notFound().build();
+		return ResponseEntity.ok().cacheControl(cache).body(pessoa.get());
+		
+		
 	}
 	
 	@Operation(summary = "Cria uma pessoa")
@@ -129,8 +136,9 @@ public class PessoaController {
 			@RequestBody Pessoa pessoa) {
 		
 		if (!pessoaRepository.existsById(pessoaId)) {
-			return ResponseEntity.notFound().build();
+			throw new EntidadeNaoEncontradaException("Pessoa não encontrada");
 		}
+		
 		
 		pessoa.setId(pessoaId);
 		pessoa = cadastroPessoa.salvar(pessoa);

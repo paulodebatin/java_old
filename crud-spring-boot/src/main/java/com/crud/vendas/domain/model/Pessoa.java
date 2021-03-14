@@ -2,6 +2,7 @@ package com.crud.vendas.domain.model;
 
 import java.time.OffsetDateTime;
 
+import javax.persistence.Cacheable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,7 +21,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Entity
 @DynamicUpdate
 @DynamicInsert
-@Cache(usage = CacheConcurrencyStrategy.TRANSACTIONAL)
+@Cacheable
+@Cache(usage=CacheConcurrencyStrategy.READ_ONLY, region = "pessoa" )
 public class Pessoa {
 
 	@Id

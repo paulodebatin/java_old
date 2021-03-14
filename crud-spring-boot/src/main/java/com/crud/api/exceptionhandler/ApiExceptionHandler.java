@@ -1,7 +1,7 @@
 package com.crud.api.exceptionhandler;
 
-import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -28,26 +28,22 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	
 	@ExceptionHandler(EntidadeNaoEncontradaException.class)
 	public ResponseEntity<Object> handleEntidadeNaoEncontrada(NegocioException ex, WebRequest request) {
-		var status = HttpStatus.NOT_FOUND;
+		return tratarProblema(ex, HttpStatus.NOT_FOUND, ex.getMessage(), request);
 		
-		var problema = new Problema();
-		problema.setStatus(status.value());
-		problema.setTitulo(ex.getMessage());
-		problema.setDataHora(OffsetDateTime.now());
 		
-		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
 	}
+
 	
 	@ExceptionHandler(NegocioException.class)
 	public ResponseEntity<Object> handleNegocio(NegocioException ex, WebRequest request) {
-		var status = HttpStatus.BAD_REQUEST;
-		
-		var problema = new Problema();
-		problema.setStatus(status.value());
-		problema.setTitulo(ex.getMessage());
-		problema.setDataHora(OffsetDateTime.now());
-		
-		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
+		return tratarProblema(ex, HttpStatus.BAD_REQUEST, ex.getMessage(), request);
+	}
+	
+	
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<Object> handleUncaught(Exception ex, WebRequest request) {
+		return tratarProblema(ex, HttpStatus.INTERNAL_SERVER_ERROR, "Ocorreu um erro interno inesperado no sistema. "
+				+ "Tente novamente e se o problema persistir, entre em contato com o administrador do sistema. Erro original: " + ex.getMessage() + " - " + ex.getStackTrace()[0], request);
 	}
 	
 	@Override
@@ -66,10 +62,19 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 		problema.setStatus(status.value());
 		problema.setTitulo("Um ou mais campos estão inválidos. "
 				+ "Faça o preenchimento correto e tente novamente");
-		problema.setDataHora(OffsetDateTime.now());
+		problema.setDataHora(Calendar.getInstance().getTime());
 		problema.setCampos(campos);
 		
 		return super.handleExceptionInternal(ex, problema, headers, status, request);
+	}
+	
+	private ResponseEntity<Object> tratarProblema(Exception ex, HttpStatus status, String titulo, WebRequest request) {
+		var problema = new Problema();
+		problema.setStatus(status.value());
+		problema.setTitulo(titulo);
+		problema.setDataHora(Calendar.getInstance().getTime());
+		
+		return handleExceptionInternal(ex, problema, new HttpHeaders(), status, request);
 	}
 	
 }
