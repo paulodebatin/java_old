@@ -34,7 +34,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	
-	@ExceptionHandler(NegocioException.class)
+	@ExceptionHandler({NegocioException.class})
 	public ResponseEntity<Object> handleNegocio(NegocioException ex, WebRequest request) {
 		return tratarProblema(ex, HttpStatus.BAD_REQUEST, ex.getMessage(), request);
 	}

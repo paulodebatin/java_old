@@ -15,15 +15,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,19 +34,16 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
 
-@CrossOrigin //(origins = "http://localhost:8089")
 @RestController
-@RequestMapping("/pessoas")
-@Tag(name = "pessoas", description = "API para manipulação de dados de pessoa")
-public class PessoaController {
+public class PessoaController implements IPessoaController{
 
 	@Autowired
 	private PessoaRepository pessoaRepository;
 	
 	@Autowired
 	private CadastroPessoaService cadastroPessoa;
+	
 	
 	 @Value("${security.token.timeout}")
 	 private int tokenTimeout;
@@ -59,12 +53,9 @@ public class PessoaController {
 //	 private Environment env; 
 	
 	
-	
-	@Operation(summary = "Logar uma pessoa")
-	@ApiResponse(responseCode = "200", description = "Operação realizada com sucesso")
-	@ApiResponse(responseCode = "404", description = "Pessoa não encontrada")
-	@GetMapping("/login")
-	public String logar(@RequestParam("username") String username, @RequestParam("password") String pwd) {
+
+	@Override 
+	public String logar(String username, String pwd) {
 		return getJWTToken(username);
 		
 	}
